@@ -1,0 +1,34 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "name": "Do laundry",
+            "description": "Lorem ipsum dolor sit amet...",
+            "completed": false,
+            "creatorId": "ABC-1234",
+            "dueDate": "2020-01-01",
+            "dueTime": "23:55:00",
+            "timezone": "GMT+7"
+        },
+        {
+            "id": 2,
+            "name": "Clean the dishes",
+            "description": "Lorem ipsum dolor sit amet...",
+            "completed": false,
+            "creatorId": "ABC-1234",
+            "dueDate": "2020-01-21",
+            "dueTime": "23:55:00",
+            "timezone": "GMT+7"
+        },
+        {
+            "id": 3,
+            "name": "Walk the dog",
+            "description": "Lorem ipsum dolor sit amet...",
+            "completed": true,
+            "creatorId": "ABC-9999",
+            "dueDate": "2020-01-14",
+            "dueTime": "23:55:00",
+            "timezone": "GMT+7"
+        }
+    ]
+}
