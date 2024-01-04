@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:todoish/tasks.dart';
+import 'package:todoish/models/tasks.dart';
 
 class TaskDetail extends StatelessWidget {
   const TaskDetail({super.key, required this.task, required this.completed});

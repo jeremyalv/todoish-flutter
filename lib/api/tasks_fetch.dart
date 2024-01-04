@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:todoish/tasks.dart';
+import 'package:todoish/models/tasks.dart';
 
 const baseUrl = "https://dummyjson.com/todos";
 
