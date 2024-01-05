@@ -15,25 +15,25 @@ class Task {
     return [
       Task(
         id: 1,
-        todo: "Custom Todo",
+        todo: "Do laundry",
         completed: false,
         userId: 1,
       ),
       Task(
         id: 2,
-        todo: "Custom Todo #2",
+        todo: "Clean the dishes",
         completed: true,
         userId: 1,
       ),
       Task(
         id: 3,
-        todo: "Custom Todo #3",
+        todo: "Walk the dog",
         completed: false,
         userId: 1,
       ),
       Task(
         id: 4,
-        todo: "Custom Todo #4",
+        todo: "Code login flow",
         completed: false,
         userId: 1,
       ),

@@ -18,26 +18,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Map<int, bool> completedTasks = {};
-  // late Future<List<Task>> futureTasks;
-  final List<Task> tasks = Task.getDummyTasks();
+
+  List<Task> tasks = Task.getDummyTasks();
+  List<Task> _foundTasks = [];
 
   final _taskController = TextEditingController();
 
   @override
   void initState() {
+    _foundTasks = tasks;
     super.initState();
-    // futureTasks = fetchTasks();
   }
 
   List<Task> getCompletedtasks() {
     return tasks.where((task) => task.completed == true).toList();
   }
-
-  // Future<List<Task>> getCompletedTasks() async {
-  //   // We know for sure that futureTasks have rendered
-  //   List<Task> tasks = await fetchTasks();
-  //   return tasks.where((task) => completedTasks[task.id] == true).toList();
-  // }
 
   void _addTaskItem(int id, String todo, bool completed, int userId) {
     setState(() {
@@ -75,190 +70,207 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _runFilter(String searchkey) {
+    List<Task> results = [];
+
+    if (searchkey.isEmpty) {
+      results = tasks;
+    } else {
+      results = tasks
+          .where((task) =>
+              task.todo!.toLowerCase().contains(searchkey.toLowerCase()))
+          .toList();
+    }
+
+    setState(() {
+      _foundTasks = results;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // List<Task> getCompletedTasks() {
-    //   // We know for sure that futureTasks have rendered
-    //   futureTasks = fetchTasks();
-    //   futureTasks.then((tasks) {
-    //     List<Task> res =
-    //         tasks.where((task) => completedTasks[task.id] == true).toList();
-
-    //     print("RES: $res");
-    //     print(res.length > 0 ? res[0].todo : "none");
-    //     return res;
-    //   });
-
-    //   return [];
-    // }
-
     print("COMPLETED TASKS $completedTasks");
 
     return SafeArea(
       child: Scaffold(
           backgroundColor: Color(0x80808080),
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            titleSpacing: 0,
-            leading: Icon(
-              Icons.now_widgets_rounded,
-              color: Colors.white,
-            ),
-            title: Text(
-              "Todoish",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            actions: <Widget>[
-              IconButton(
-                icon: const Icon(
-                  Icons.archive,
-                  color: Colors.white,
+          appBar: _AppBar(context),
+          body: Stack(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                child: Column(
+                  children: [
+                    // Searchbox
+                    Container(
+                      margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: TextField(
+                        onChanged: (val) => _runFilter(val),
+                        decoration: InputDecoration(
+                            constraints: BoxConstraints(maxHeight: 60),
+                            filled: true,
+                            fillColor: Colors.grey,
+                            contentPadding: EdgeInsets.all(0),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Colors.black,
+                              size: 22,
+                            ),
+                            prefixIconConstraints:
+                                BoxConstraints(maxHeight: 20, minWidth: 40),
+                            border: InputBorder.none,
+                            hintText: "Search task",
+                            hintStyle: TextStyle(
+                                color: const Color.fromARGB(255, 102, 95, 95),
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    _Todolist(),
+                  ],
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => CompletedTasks(
-                              key: UniqueKey(),
-                              completedTasks: getCompletedtasks(),
-                              onTaskClick: _onTaskClick,
-                              onTaskChangeComplete: _onTaskChangeComplete,
-                              onTaskDelete: _onTaskDelete,
-                            )),
-                  );
-                },
               ),
             ],
-          ),
-          body: ListView.separated(
-            itemCount: tasks.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TaskDetail(
-                            task: tasks[index],
-                            completed: completedTasks[tasks[index].id] == true),
-                      ));
-                },
-                child: TaskRow(
-                  vpadding: 8,
-                  hpadding: 12,
-                  task: tasks[index],
-                  onTaskClick: _onTaskClick,
-                  onTaskChangeComplete: _onTaskChangeComplete,
-                  onTaskDelete: _onTaskDelete,
-                ),
-              );
-
-              // return GestureDetector(
-              //     child: taskTile(context, tasks, index));
-            },
-            separatorBuilder: ((_, __) => Divider(
-                  thickness: .5,
-                  height: 2,
-                  color: Colors.black,
-                )),
           )),
     );
   }
 
-  FutureBuilder<Object?> _futureTasksBuilder(Future<List<Task>> futureTasks) {
-    return FutureBuilder(
-        future: futureTasks,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List<Task> tasks = snapshot.data as List<Task>;
-
-            return ListView.separated(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TaskDetail(
-                              task: tasks[index],
-                              completed:
-                                  completedTasks[tasks[index].id] == true),
-                        ));
-                  },
-                  child: TaskRow(
-                    task: tasks[index],
-                    onTaskClick: _onTaskClick,
-                    onTaskChangeComplete: _onTaskChangeComplete,
-                    onTaskDelete: _onTaskDelete,
-                  ),
-                );
-
-                // return GestureDetector(
-                //     child: taskTile(context, tasks, index));
-              },
-              separatorBuilder: ((_, __) => Divider(
-                    thickness: .5,
-                    height: 20,
-                    color: Colors.black,
-                  )),
+  AppBar _AppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      titleSpacing: 0,
+      leading: Icon(
+        Icons.now_widgets_rounded,
+        color: Colors.white,
+      ),
+      title: Text(
+        "Todoish",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      actions: <Widget>[
+        IconButton(
+          icon: const Icon(
+            Icons.archive,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => CompletedTasks(
+                        key: UniqueKey(),
+                        completedTasks: getCompletedtasks(),
+                        onTaskClick: _onTaskClick,
+                        onTaskChangeComplete: _onTaskChangeComplete,
+                        onTaskDelete: _onTaskDelete,
+                      )),
             );
-          }
-          if (snapshot.hasError) {
-            return Text(
-              "Oops, an error happened: ${snapshot.error}",
-            );
-          }
-
-          return Center(
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 10),
-              Text(
-                "Loading tasks...",
-                style: TextStyle(color: Colors.white),
-              ),
-            ]),
-          );
-        });
+          },
+        ),
+      ],
+    );
   }
 
-  /* COMPONENTS */
+  Expanded _Todolist() {
+    return Expanded(
+      child: ListView.separated(
+        itemCount: _foundTasks.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TaskDetail(
+                        task: _foundTasks[index],
+                        completed:
+                            completedTasks[_foundTasks[index].id] == true),
+                  ));
+            },
+            child: TaskRow(
+              vpadding: 8,
+              hpadding: 12,
+              task: _foundTasks[index],
+              onTaskClick: _onTaskClick,
+              onTaskChangeComplete: _onTaskChangeComplete,
+              onTaskDelete: _onTaskDelete,
+            ),
+          );
+        },
+        separatorBuilder: ((_, __) => Divider(
+              thickness: .5,
+              height: 2,
+              color: Colors.black,
+            )),
+      ),
+    );
+  }
 
-  // ListTile taskTile(BuildContext context, List<Task> tasks, int index) {
-  //   return ListTile(
-  //     onTap: () {
-  //       Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => TaskDetail(
-  //                 task: tasks[index],
-  //                 completed: completedTasks[tasks[index].id] == true),
-  //           ));
-  //     },
-  //     leading: Transform.scale(
-  //       scale: 1.35,
-  //       child: Checkbox(
-  //           shape: CircleBorder(),
-  //           side: BorderSide(color: Colors.grey),
-  //           value: completedTasks[tasks[index].id] == true,
-  //           onChanged: (value) {
-  //             setState(() {
-  //               completedTasks[tasks[index].id] = value!;
-  //             });
-  //           }),
-  //     ),
-  //     title: Text(
-  //       tasks[index].todo,
-  //       style: TextStyle(
-  //         color: Colors.white,
-  //       ),
-  //     ),
-  //   );
+  // For remote API call
+  // FutureBuilder<Object?> _futureTasksBuilder(Future<List<Task>> futureTasks) {
+  //   return FutureBuilder(
+  //       future: futureTasks,
+  //       builder: (context, snapshot) {
+  //         if (snapshot.hasData) {
+  //           List<Task> tasks = snapshot.data as List<Task>;
+
+  //           return ListView.separated(
+  //             itemCount: tasks.length,
+  //             itemBuilder: (context, index) {
+  //               return GestureDetector(
+  //                 onTap: () {
+  //                   Navigator.push(
+  //                       context,
+  //                       MaterialPageRoute(
+  //                         builder: (context) => TaskDetail(
+  //                             task: tasks[index],
+  //                             completed:
+  //                                 completedTasks[tasks[index].id] == true),
+  //                       ));
+  //                 },
+  //                 child: TaskRow(
+  //                   task: tasks[index],
+  //                   onTaskClick: _onTaskClick,
+  //                   onTaskChangeComplete: _onTaskChangeComplete,
+  //                   onTaskDelete: _onTaskDelete,
+  //                 ),
+  //               );
+
+  //               // return GestureDetector(
+  //               //     child: taskTile(context, tasks, index));
+  //             },
+  //             separatorBuilder: ((_, __) => Divider(
+  //                   thickness: .5,
+  //                   height: 20,
+  //                   color: Colors.black,
+  //                 )),
+  //           );
+  //         }
+  //         if (snapshot.hasError) {
+  //           return Text(
+  //             "Oops, an error happened: ${snapshot.error}",
+  //           );
+  //         }
+
+  //         return Center(
+  //           child:
+  //               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+  //             CircularProgressIndicator(),
+  //             SizedBox(height: 10),
+  //             Text(
+  //               "Loading tasks...",
+  //               style: TextStyle(color: Colors.white),
+  //             ),
+  //           ]),
+  //         );
+  //       });
   // }
 }
