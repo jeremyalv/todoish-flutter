@@ -34,13 +34,13 @@ class _HomePageState extends State<HomePage> {
     return tasks.where((task) => task.completed == true).toList();
   }
 
-  void _addTaskItem(int id, String todo, bool completed, int userId) {
+  void _addTaskItem(String todo) {
     setState(() {
       tasks.add(Task(
-        id: id,
+        id: tasks[tasks.length - 1].id + 1,
         todo: todo,
-        completed: completed,
-        userId: userId,
+        completed: false,
+        userId: 1,
       ));
     });
 
@@ -102,40 +102,102 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     // Searchbox
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextField(
-                        onChanged: (val) => _runFilter(val),
-                        decoration: InputDecoration(
-                            constraints: BoxConstraints(maxHeight: 60),
-                            filled: true,
-                            fillColor: Colors.grey,
-                            contentPadding: EdgeInsets.all(0),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: Colors.black,
-                              size: 22,
-                            ),
-                            prefixIconConstraints:
-                                BoxConstraints(maxHeight: 20, minWidth: 40),
-                            border: InputBorder.none,
-                            hintText: "Search task",
-                            hintStyle: TextStyle(
-                                color: const Color.fromARGB(255, 102, 95, 95),
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ),
+                    _searchBar(),
                     _Todolist(),
                   ],
                 ),
               ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        margin:
+                            EdgeInsets.only(bottom: 20, right: 20, left: 20),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                            color: Colors.grey,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black45,
+                                offset: Offset(0, 0),
+                                blurRadius: 7,
+                                spreadRadius: 3,
+                              )
+                            ],
+                            borderRadius: BorderRadius.circular(15)),
+                        child: TextField(
+                            controller: _taskController,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: "Add a new task",
+                              hintStyle: TextStyle(color: Colors.white),
+                              border: InputBorder.none,
+                            )),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 20, right: 20),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _addTaskItem(_taskController.text);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          minimumSize: Size(60, 60),
+                          elevation: 10,
+                        ),
+                        child: Text(
+                          '+',
+                          style: TextStyle(
+                            fontSize: 40,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
             ],
           )),
+    );
+  }
+
+  Container _searchBar() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: TextField(
+        onChanged: (val) => _runFilter(val),
+        style: TextStyle(
+          color: Colors.white,
+        ),
+        decoration: InputDecoration(
+            constraints: BoxConstraints(maxHeight: 60),
+            filled: true,
+            fillColor: Colors.grey,
+            contentPadding: EdgeInsets.all(0),
+            prefixIcon: Icon(
+              Icons.search,
+              color: Colors.black,
+              size: 22,
+            ),
+            prefixIconConstraints: BoxConstraints(maxHeight: 20, minWidth: 40),
+            border: InputBorder.none,
+            hintText: "Search task",
+            hintStyle: TextStyle(
+                color: const Color.fromARGB(255, 102, 95, 95),
+                fontWeight: FontWeight.bold)),
+      ),
     );
   }
 
