@@ -18,26 +18,30 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Map<int, bool> completedTasks = {};
-  late Future<List<Task>> futureTasks;
-  final List<Task> tasksList = Task.getDummyTasks();
+  // late Future<List<Task>> futureTasks;
+  final List<Task> tasks = Task.getDummyTasks();
 
   final _taskController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    futureTasks = fetchTasks();
+    // futureTasks = fetchTasks();
   }
 
-  Future<List<Task>> getCompletedTasks() async {
-    // We know for sure that futureTasks have rendered
-    List<Task> tasks = await fetchTasks();
-    return tasks.where((task) => completedTasks[task.id] == true).toList();
+  List<Task> getCompletedtasks() {
+    return tasks.where((task) => task.completed == true).toList();
   }
+
+  // Future<List<Task>> getCompletedTasks() async {
+  //   // We know for sure that futureTasks have rendered
+  //   List<Task> tasks = await fetchTasks();
+  //   return tasks.where((task) => completedTasks[task.id] == true).toList();
+  // }
 
   void _addTaskItem(int id, String todo, bool completed, int userId) {
     setState(() {
-      tasksList.add(Task(
+      tasks.add(Task(
         id: id,
         todo: todo,
         completed: completed,
@@ -67,7 +71,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onTaskDelete(int taskId) {
     setState(() {
-      tasksList.removeWhere((item) => item.id == taskId);
+      tasks.removeWhere((item) => item.id == taskId);
     });
   }
 
@@ -119,70 +123,109 @@ class _HomePageState extends State<HomePage> {
                     context,
                     MaterialPageRoute(
                         builder: (BuildContext context) => CompletedTasks(
-                              completedTasks: getCompletedTasks(),
+                              key: UniqueKey(),
+                              completedTasks: getCompletedtasks(),
+                              onTaskClick: _onTaskClick,
+                              onTaskChangeComplete: _onTaskChangeComplete,
+                              onTaskDelete: _onTaskDelete,
                             )),
                   );
                 },
               ),
             ],
           ),
-          body: FutureBuilder(
-              future: futureTasks,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  var tasks = snapshot.data!;
+          body: ListView.separated(
+            itemCount: tasks.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TaskDetail(
+                            task: tasks[index],
+                            completed: completedTasks[tasks[index].id] == true),
+                      ));
+                },
+                child: TaskRow(
+                  vpadding: 8,
+                  hpadding: 12,
+                  task: tasks[index],
+                  onTaskClick: _onTaskClick,
+                  onTaskChangeComplete: _onTaskChangeComplete,
+                  onTaskDelete: _onTaskDelete,
+                ),
+              );
 
-                  return ListView.separated(
-                    itemCount: tasks.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TaskDetail(
-                                    task: tasks[index],
-                                    completed:
-                                        completedTasks[tasks[index].id] ==
-                                            true),
-                              ));
-                        },
-                        child: TaskRow(
-                          task: tasks[index],
-                          onTaskClick: _onTaskClick,
-                          onTaskChangeComplete: _onTaskChangeComplete,
-                          onTaskDelete: _onTaskDelete,
-                        ),
-                      );
-
-                      // return GestureDetector(
-                      //     child: taskTile(context, tasks, index));
-                    },
-                    separatorBuilder: ((_, __) => const Divider(
-                          thickness: .5,
-                        )),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Text(
-                    "Oops, an error happened: ${snapshot.error}",
-                  );
-                }
-
-                return Center(
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 10),
-                        Text(
-                          "Loading tasks...",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ]),
-                );
-              })),
+              // return GestureDetector(
+              //     child: taskTile(context, tasks, index));
+            },
+            separatorBuilder: ((_, __) => Divider(
+                  thickness: .5,
+                  height: 2,
+                  color: Colors.black,
+                )),
+          )),
     );
+  }
+
+  FutureBuilder<Object?> _futureTasksBuilder(Future<List<Task>> futureTasks) {
+    return FutureBuilder(
+        future: futureTasks,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<Task> tasks = snapshot.data as List<Task>;
+
+            return ListView.separated(
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TaskDetail(
+                              task: tasks[index],
+                              completed:
+                                  completedTasks[tasks[index].id] == true),
+                        ));
+                  },
+                  child: TaskRow(
+                    task: tasks[index],
+                    onTaskClick: _onTaskClick,
+                    onTaskChangeComplete: _onTaskChangeComplete,
+                    onTaskDelete: _onTaskDelete,
+                  ),
+                );
+
+                // return GestureDetector(
+                //     child: taskTile(context, tasks, index));
+              },
+              separatorBuilder: ((_, __) => Divider(
+                    thickness: .5,
+                    height: 20,
+                    color: Colors.black,
+                  )),
+            );
+          }
+          if (snapshot.hasError) {
+            return Text(
+              "Oops, an error happened: ${snapshot.error}",
+            );
+          }
+
+          return Center(
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 10),
+              Text(
+                "Loading tasks...",
+                style: TextStyle(color: Colors.white),
+              ),
+            ]),
+          );
+        });
   }
 
   /* COMPONENTS */

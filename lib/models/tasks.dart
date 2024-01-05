@@ -14,20 +14,26 @@ class Task {
   static List<Task> getDummyTasks() {
     return [
       Task(
-        id: 1000,
+        id: 1,
         todo: "Custom Todo",
         completed: false,
         userId: 1,
       ),
       Task(
-        id: 1001,
+        id: 2,
         todo: "Custom Todo #2",
+        completed: true,
+        userId: 1,
+      ),
+      Task(
+        id: 3,
+        todo: "Custom Todo #3",
         completed: false,
         userId: 1,
       ),
       Task(
-        id: 1002,
-        todo: "Custom Todo #3",
+        id: 4,
+        todo: "Custom Todo #4",
         completed: false,
         userId: 1,
       ),

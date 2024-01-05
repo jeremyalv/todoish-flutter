@@ -5,13 +5,6 @@ import 'package:flutter/services.dart';
 
 import 'package:todoish/pages/home_page.dart';
 
-import 'package:todoish/models/tasks.dart';
-import 'package:todoish/api/tasks_fetch.dart';
-import 'package:todoish/pages/task_detail.dart';
-import 'package:todoish/pages/completed_tasks.dart';
-import 'package:todoish/components/task_row.dart';
-import 'package:todoish/constants/colors.dart';
-
 void main() {
   runApp(const TodoishApp());
 }

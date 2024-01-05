@@ -4,62 +4,69 @@ import 'package:todoish/models/tasks.dart';
 import 'package:todoish/pages/task_detail.dart';
 
 class TaskRow extends StatelessWidget {
-  const TaskRow(
-      {super.key,
-      required this.task,
-      required this.onTaskClick,
-      required this.onTaskChangeComplete,
-      required this.onTaskDelete});
+  const TaskRow({
+    super.key,
+    required this.task,
+    required this.onTaskClick,
+    required this.onTaskChangeComplete,
+    required this.onTaskDelete,
+    this.vpadding = 4,
+    this.hpadding = 2,
+  });
 
   final Task task;
 
   // Handlers
-  final onTaskClick;
-  final onTaskChangeComplete;
-  final onTaskDelete;
+  final Function onTaskClick;
+  final Function onTaskChangeComplete;
+  final Function onTaskDelete;
+  final double vpadding;
+  final double hpadding;
 
   @override
   Widget build(BuildContext context) {
-    // TODO - add event handlers and connect with this component.
-    return Container(
-      child: GestureDetector(
-        child: ListTile(
-          onTap: () {
-            onTaskClick(context, task);
-          },
-          leading: Transform.scale(
-            scale: 1.35,
-            child: Checkbox(
-                shape: CircleBorder(),
-                side: BorderSide(color: Colors.grey),
-                checkColor: Theme.of(context).primaryColor,
-                value: task.completed,
-                onChanged: (checkValue) {
-                  onTaskChangeComplete(task);
-                }),
-          ),
-          title: Text(
-            task.todo,
-            style: TextStyle(
+    return GestureDetector(
+      child: ListTile(
+        contentPadding:
+            EdgeInsets.symmetric(vertical: vpadding, horizontal: hpadding),
+        onTap: () {
+          onTaskClick(context, task);
+        },
+        leading: Transform.scale(
+          scale: 1.35,
+          child: Checkbox(
+              shape: CircleBorder(),
+              side: BorderSide(color: Colors.grey),
+              checkColor: Theme.of(context).primaryColor,
+              value: task.completed,
+              onChanged: (checkValue) {
+                onTaskChangeComplete(task);
+              }),
+        ),
+        title: Text(
+          task.todo,
+          style: TextStyle(
               color: Colors.white,
-            ),
-          ),
-          trailing: Container(
-            padding: EdgeInsets.all(0),
-            margin: EdgeInsets.symmetric(vertical: 12),
-            height: 35,
-            width: 35,
-            decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(5)),
-            child: IconButton(
-              icon: Icon(Icons.delete),
-              iconSize: 18,
-              color: Colors.white,
-              onPressed: () {
-                onTaskDelete(task.id);
-              },
-            ),
+              decorationColor: Colors.red,
+              decorationThickness: 1.25,
+              decoration: task.completed == true
+                  ? TextDecoration.lineThrough
+                  : TextDecoration.none),
+        ),
+        trailing: Container(
+          margin: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+          height: 35,
+          width: 35,
+          decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: BorderRadius.circular(5)),
+          child: IconButton(
+            icon: Icon(Icons.delete),
+            iconSize: 18,
+            color: Colors.white,
+            onPressed: () {
+              onTaskDelete(task.id);
+            },
           ),
         ),
       ),
