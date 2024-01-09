@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors, slash_for_doc_comments, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:todoish/main.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import 'package:todoish/models/tasks.dart';
 import 'package:todoish/api/tasks_fetch.dart';
@@ -24,10 +24,50 @@ class _HomePageState extends State<HomePage> {
 
   final _taskController = TextEditingController();
 
+  // Onboarding: ShowCase section keys
+  final GlobalKey _one_MarkCompleteSection = GlobalKey();
+  final GlobalKey _two_DeleteTaskSection = GlobalKey();
+  final GlobalKey _three_SearchTaskSection = GlobalKey();
+  final GlobalKey _four_TypeNewTaskSection = GlobalKey();
+  final GlobalKey _five_ClickAddTaskSection = GlobalKey();
+  final GlobalKey _six_ViewTaskDetailsSection = GlobalKey();
+  final GlobalKey _seven_ViewCompletedTasksSection = GlobalKey();
+
+  final scrollController = ScrollController();
+
+  // WIDGET LIFECYCLE METHODS
+
   @override
   void initState() {
     _foundTasks = tasks;
+
+    // Pass in Start onboarding an
+    _startOnboarding(context);
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  // WIDGET HELPER METHODS
+  void _startOnboarding(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      List<GlobalKey> showcaseKeys = [
+        _one_MarkCompleteSection,
+        _two_DeleteTaskSection,
+        _three_SearchTaskSection,
+        _four_TypeNewTaskSection,
+        _five_ClickAddTaskSection,
+        _six_ViewTaskDetailsSection,
+        _seven_ViewCompletedTasksSection,
+      ];
+
+      return ShowCaseWidget.of(context).startShowCase(showcaseKeys);
+    });
   }
 
   List<Task> getCompletedtasks() {
@@ -36,12 +76,14 @@ class _HomePageState extends State<HomePage> {
 
   void _addTaskItem(String todo) {
     setState(() {
-      tasks.add(Task(
+      Task newTask = Task(
         id: tasks[tasks.length - 1].id + 1,
         todo: todo,
         completed: false,
         userId: 1,
-      ));
+      );
+
+      tasks.insert(0, newTask);
     });
 
     _taskController.clear();
@@ -89,88 +131,91 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print("COMPLETED TASKS $completedTasks");
-
     return Scaffold(
         backgroundColor: Color(0x80808080),
-        appBar: _AppBar(context),
+        appBar: _appBar(context),
         body: SafeArea(
+          bottom: false,
           child: Stack(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                padding:
+                    EdgeInsets.only(left: 6, right: 6, top: 12, bottom: 70),
                 child: Column(
                   children: [
                     // Searchbox
                     _searchBar(),
-                    _Todolist(),
+                    _todoList(),
                   ],
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        margin:
-                            EdgeInsets.only(bottom: 20, right: 20, left: 20),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                            color: Colors.grey,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black45,
-                                offset: Offset(0, 0),
-                                blurRadius: 7,
-                                spreadRadius: 3,
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(15)),
-                        child: TextField(
-                            controller: _taskController,
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: "Add a new task",
-                              hintStyle: TextStyle(color: Colors.white),
-                              border: InputBorder.none,
-                            )),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(bottom: 20, right: 20),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _addTaskItem(_taskController.text);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
-                          minimumSize: Size(60, 60),
-                          elevation: 10,
-                        ),
-                        child: Text(
-                          '+',
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
+              bottomMenuAddTask()
             ],
           ),
         ));
   }
 
+  Align bottomMenuAddTask() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.only(bottom: 15, right: 20, left: 20),
+              padding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                  color: Colors.grey,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black45,
+                      offset: Offset(0, 0),
+                      blurRadius: 7,
+                      spreadRadius: 3,
+                    )
+                  ],
+                  borderRadius: BorderRadius.circular(15)),
+              child: TextField(
+                  controller: _taskController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Add a new task",
+                    hintStyle: TextStyle(color: Colors.white),
+                    border: InputBorder.none,
+                  )),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 15, right: 20),
+            child: ElevatedButton(
+              onPressed: () {
+                _addTaskItem(_taskController.text);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey,
+                minimumSize: Size(60, 60),
+                elevation: 10,
+              ),
+              child: Text(
+                '+',
+                style: TextStyle(
+                  fontSize: 40,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Container _searchBar() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.grey,
@@ -201,7 +246,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  AppBar _AppBar(BuildContext context) {
+  AppBar _appBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
       titleSpacing: 0,
@@ -241,9 +286,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Expanded _Todolist() {
+  Expanded _todoList() {
     return Expanded(
       child: ListView.separated(
+        physics: ScrollPhysics(parent: BouncingScrollPhysics()),
+        reverse: false,
         itemCount: _foundTasks.length,
         itemBuilder: (context, index) {
           return GestureDetector(
@@ -275,64 +322,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  // For remote API call
-  // FutureBuilder<Object?> _futureTasksBuilder(Future<List<Task>> futureTasks) {
-  //   return FutureBuilder(
-  //       future: futureTasks,
-  //       builder: (context, snapshot) {
-  //         if (snapshot.hasData) {
-  //           List<Task> tasks = snapshot.data as List<Task>;
-
-  //           return ListView.separated(
-  //             itemCount: tasks.length,
-  //             itemBuilder: (context, index) {
-  //               return GestureDetector(
-  //                 onTap: () {
-  //                   Navigator.push(
-  //                       context,
-  //                       MaterialPageRoute(
-  //                         builder: (context) => TaskDetail(
-  //                             task: tasks[index],
-  //                             completed:
-  //                                 completedTasks[tasks[index].id] == true),
-  //                       ));
-  //                 },
-  //                 child: TaskRow(
-  //                   task: tasks[index],
-  //                   onTaskClick: _onTaskClick,
-  //                   onTaskChangeComplete: _onTaskChangeComplete,
-  //                   onTaskDelete: _onTaskDelete,
-  //                 ),
-  //               );
-
-  //               // return GestureDetector(
-  //               //     child: taskTile(context, tasks, index));
-  //             },
-  //             separatorBuilder: ((_, __) => Divider(
-  //                   thickness: .5,
-  //                   height: 20,
-  //                   color: Colors.black,
-  //                 )),
-  //           );
-  //         }
-  //         if (snapshot.hasError) {
-  //           return Text(
-  //             "Oops, an error happened: ${snapshot.error}",
-  //           );
-  //         }
-
-  //         return Center(
-  //           child:
-  //               Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-  //             CircularProgressIndicator(),
-  //             SizedBox(height: 10),
-  //             Text(
-  //               "Loading tasks...",
-  //               style: TextStyle(color: Colors.white),
-  //             ),
-  //           ]),
-  //         );
-  //       });
-  // }
 }

@@ -13,7 +13,7 @@ class Task {
 
   static List<Task> getDummyTasks() {
     int idx = 0;
-    return [
+    List<Task> tasks = [
       Task(
         id: idx++,
         todo: "Do laundry",
@@ -93,5 +93,7 @@ class Task {
         userId: 1,
       ),
     ];
+
+    return tasks;
   }
 }
