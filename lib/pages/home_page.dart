@@ -91,11 +91,11 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     print("COMPLETED TASKS $completedTasks");
 
-    return SafeArea(
-      child: Scaffold(
-          backgroundColor: Color(0x80808080),
-          appBar: _AppBar(context),
-          body: Stack(
+    return Scaffold(
+        backgroundColor: Color(0x80808080),
+        appBar: _AppBar(context),
+        body: SafeArea(
+          child: Stack(
             children: [
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 6, vertical: 10),
@@ -164,8 +164,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               )
             ],
-          )),
-    );
+          ),
+        ));
   }
 
   Container _searchBar() {
@@ -259,7 +259,7 @@ class _HomePageState extends State<HomePage> {
             },
             child: TaskRow(
               vpadding: 8,
-              hpadding: 12,
+              hpadding: 25,
               task: _foundTasks[index],
               onTaskClick: _onTaskClick,
               onTaskChangeComplete: _onTaskChangeComplete,
