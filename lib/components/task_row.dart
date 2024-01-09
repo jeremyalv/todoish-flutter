@@ -10,9 +10,13 @@ class TaskRow extends StatelessWidget {
     required this.onTaskClick,
     required this.onTaskChangeComplete,
     required this.onTaskDelete,
+    this.showCaseDetail = false,
+    this.showCaseKey,
     this.vpadding = 4,
     this.hpadding = 2,
   });
+
+  // TODO add key params to build()
 
   final Task task;
 
@@ -22,6 +26,9 @@ class TaskRow extends StatelessWidget {
   final Function onTaskDelete;
   final double vpadding;
   final double hpadding;
+
+  final bool showCaseDetail;
+  final GlobalKey<State<StatefulWidget>>? showCaseKey;
 
   @override
   Widget build(BuildContext context) {

@@ -33,6 +33,8 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey _six_ViewTaskDetailsSection = GlobalKey();
   final GlobalKey _seven_ViewCompletedTasksSection = GlobalKey();
 
+  List<GlobalKey> showcaseKeys = [];
+
   final scrollController = ScrollController();
 
   // WIDGET LIFECYCLE METHODS
@@ -41,8 +43,19 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     _foundTasks = tasks;
 
+    // At construct time, fill showcaseKeys
+    showcaseKeys = [
+      _one_MarkCompleteSection,
+      _two_DeleteTaskSection,
+      _three_SearchTaskSection,
+      _four_TypeNewTaskSection,
+      _five_ClickAddTaskSection,
+      _six_ViewTaskDetailsSection,
+      _seven_ViewCompletedTasksSection,
+    ];
+
     // Pass in Start onboarding an
-    _startOnboarding(context);
+    _startOnboarding(context, showcaseKeys);
 
     super.initState();
   }
@@ -54,18 +67,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   // WIDGET HELPER METHODS
-  void _startOnboarding(BuildContext context) {
+  void _startOnboarding(BuildContext context,
+      List<GlobalKey<State<StatefulWidget>>> showcaseKeys) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      List<GlobalKey> showcaseKeys = [
-        _one_MarkCompleteSection,
-        _two_DeleteTaskSection,
-        _three_SearchTaskSection,
-        _four_TypeNewTaskSection,
-        _five_ClickAddTaskSection,
-        _six_ViewTaskDetailsSection,
-        _seven_ViewCompletedTasksSection,
-      ];
-
       return ShowCaseWidget.of(context).startShowCase(showcaseKeys);
     });
   }
@@ -286,6 +290,62 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  GestureDetector _showCaseTaskTile(
+      {required GlobalKey<State<StatefulWidget>> key,
+      required bool showCaseDetail,
+      required BuildContext context,
+      required Task task}) {
+    // "Do Laundry" task tile
+    int index = 0;
+
+    // Change params for Showcase() here
+    Map<String, dynamic> showcaseParams = {
+      "key": key,
+      "description": "Tap to complete a task",
+      "tooltipPosition": TooltipPosition.top,
+      "disposeOnTap": true, // Go to detail page
+      "onTargetClick": () {
+        Navigator.push<void>(
+          context,
+          MaterialPageRoute<void>(
+            builder: (_) => TaskDetail(
+                task: _foundTasks[index],
+                completed: completedTasks[_foundTasks[index].id] == true),
+          ),
+        ).then((_) {
+          List<GlobalKey<State<StatefulWidget>>> remainingShowcases =
+              showcaseKeys.sublist(1, showcaseKeys.length - 1);
+          setState(() {
+            // Multi-page Showcasing
+            // After tapping TaskTile and navigating back, we want to resume the showcase for the next parts (which are on the previous page)
+            ShowCaseWidget.of(context).startShowCase(remainingShowcases);
+          });
+        });
+      },
+      "child": task,
+    };
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push<void>(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => TaskDetail(
+                  task: _foundTasks[index],
+                  completed: completedTasks[_foundTasks[index].id] == true),
+            ));
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Showcase(
+          key: showcaseParams["key"],
+          description: showcaseParams["description"],
+          child: showcaseParams["child"],
+        ),
+      ),
+    );
+  }
+
   Expanded _todoList() {
     return Expanded(
       child: ListView.separated(
@@ -293,6 +353,15 @@ class _HomePageState extends State<HomePage> {
         reverse: false,
         itemCount: _foundTasks.length,
         itemBuilder: (context, index) {
+          if (index == 0) {
+            // TODO
+            // For the first Task element, we'll show the showcase onboarding
+            return _showCaseTaskTile(
+                key: _one_MarkCompleteSection,
+                showCaseDetail: true,
+                context: context,
+                task: _foundTasks.first);
+          }
           return GestureDetector(
             onTap: () {
               Navigator.push(
