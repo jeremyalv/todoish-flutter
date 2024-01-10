@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 import 'package:todoish/models/tasks.dart';
+import 'package:todoish/pages/add_task_button.dart';
+import 'package:todoish/pages/add_task_text_field.dart';
 import 'package:todoish/pages/task_detail.dart';
 import 'package:todoish/pages/completed_tasks.dart';
 import 'package:todoish/components/task_row.dart';
@@ -34,6 +36,7 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey _five_ClickAddTaskSection = GlobalKey();
   final GlobalKey _six_ViewTaskDetailsSection = GlobalKey();
   final GlobalKey _seven_ViewCompletedTasksSection = GlobalKey();
+  final GlobalKey _eight_FinishGuidedTour = GlobalKey();
 
   List<GlobalKey> _showcaseKeys = [];
 
@@ -59,6 +62,7 @@ class _HomePageState extends State<HomePage> {
       _five_ClickAddTaskSection,
       _six_ViewTaskDetailsSection,
       _seven_ViewCompletedTasksSection,
+      _eight_FinishGuidedTour
     ];
 
     if (_autoOnboarding) _startOnboarding(context, _showcaseKeys);
@@ -261,6 +265,35 @@ class _HomePageState extends State<HomePage> {
   }
 
   AppBar _appBar(BuildContext context) {
+    stepSeven_onTargetClick() {
+      Navigator.push<void>(
+        context,
+        MaterialPageRoute(
+            builder: (BuildContext context) => CompletedTasks(
+                  key: UniqueKey(),
+                  completedTasks: getCompletedtasks(),
+                  onTaskClick: _onTaskClick,
+                  onTaskChangeComplete: _onTaskChangeComplete,
+                  onTaskDelete: _onTaskDelete,
+                )),
+      ).then((_) => {
+            setState(() {
+              // Multi-page Showcasing
+              // After tapping IconButton and navigating back, we want to resume the showcase for the next parts (which are on the previous page)
+              ShowCaseWidget.of(context).startShowCase([
+                _eight_FinishGuidedTour,
+              ]);
+            })
+          });
+    }
+
+    Widget completedTasksButton = IconButton(
+      icon: const Icon(
+        Icons.archive,
+        color: Colors.white,
+      ),
+      onPressed: stepSeven_onTargetClick,
+    );
     return AppBar(
       backgroundColor: Colors.transparent,
       titleSpacing: 0,
@@ -278,33 +311,29 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
         ),
       ),
-      title: Text(
-        "Todoish",
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.w400,
+      title: Showcase(
+        key: _eight_FinishGuidedTour,
+        title: "Congrats!",
+        description:
+            "You've finished the tour. Explore more feature tips on Todoish's website.",
+        child: Text(
+          "Todoish",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w400,
+          ),
         ),
       ),
-      actions: <Widget>[
-        IconButton(
-          icon: const Icon(
-            Icons.archive,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (BuildContext context) => CompletedTasks(
-                        key: UniqueKey(),
-                        completedTasks: getCompletedtasks(),
-                        onTaskClick: _onTaskClick,
-                        onTaskChangeComplete: _onTaskChangeComplete,
-                        onTaskDelete: _onTaskDelete,
-                      )),
-            );
-          },
+      actions: [
+        Showcase(
+          key: _seven_ViewCompletedTasksSection,
+          title: "Completed Tasks",
+          description: "Tap and view your completed tasks here",
+          tooltipPosition: TooltipPosition.bottom,
+          disposeOnTap: true,
+          onTargetClick: stepSeven_onTargetClick,
+          child: completedTasksButton,
         ),
       ],
     );
@@ -358,7 +387,10 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               // Multi-page Showcasing
               // After tapping TaskTile and navigating back, we want to resume the showcase for the next parts (which are on the previous page)
-              ShowCaseWidget.of(context).startShowCase([_showcaseKeys[7]]);
+              ShowCaseWidget.of(context).startShowCase([
+                _seven_ViewCompletedTasksSection,
+                _eight_FinishGuidedTour,
+              ]);
             })
           });
     }
@@ -474,7 +506,9 @@ class _HomePageState extends State<HomePage> {
       targetPadding: EdgeInsets.only(
         top: 10,
       ),
-      child: _addTaskTextField(),
+      child: AddTaskTextField(
+          focusNewTaskField: _focusNewTaskField,
+          newTaskNameController: _newTaskNameController),
     );
 
     // Button
@@ -487,7 +521,11 @@ class _HomePageState extends State<HomePage> {
         top: 10,
         left: 15,
       ),
-      child: _addTaskButton(),
+      // child: _addTaskButton(),
+      child: AddTaskbutton(
+        addTaskItem: _addTaskItem,
+        newTaskNameController: _newTaskNameController,
+      ),
     );
     return Align(
       alignment: Alignment.bottomCenter,
@@ -498,59 +536,6 @@ class _HomePageState extends State<HomePage> {
           ),
           showcaseAddTaskButton,
         ],
-      ),
-    );
-  }
-
-  Container _addTaskTextField() {
-    return Container(
-      margin: EdgeInsets.only(bottom: 10, right: 15, left: 15),
-      padding: EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-          color: Colors.grey,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              offset: Offset(0, 0),
-              blurRadius: 7,
-              spreadRadius: 3,
-            )
-          ],
-          borderRadius: BorderRadius.circular(15)),
-      child: TextField(
-          focusNode: _focusNewTaskField,
-          controller: _newTaskNameController,
-          style: TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: "Add a new task",
-            hintStyle: TextStyle(color: Colors.white),
-            border: InputBorder.none,
-          )),
-    );
-  }
-
-  Container _addTaskButton() {
-    return Container(
-      margin: EdgeInsets.only(bottom: 10, right: 15),
-      child: ElevatedButton(
-        onPressed: () {
-          _addTaskItem(_newTaskNameController.text);
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey,
-          minimumSize: Size(60, 60),
-          elevation: 10,
-        ),
-        child: Text(
-          '+',
-          style: TextStyle(
-            fontSize: 40,
-            color: Colors.white,
-          ),
-        ),
       ),
     );
   }
