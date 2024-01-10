@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     ];
 
     // Pass in Start onboarding an
-    _startOnboarding(context, showcaseKeys);
+    // _startOnboarding(context, showcaseKeys);
 
     super.initState();
   }
@@ -69,6 +69,7 @@ class _HomePageState extends State<HomePage> {
   // WIDGET HELPER METHODS
   void _startOnboarding(BuildContext context,
       List<GlobalKey<State<StatefulWidget>>> showcaseKeys) {
+    // Begin onboarding immediately after app starts
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       return ShowCaseWidget.of(context).startShowCase(showcaseKeys);
     });
@@ -254,9 +255,19 @@ class _HomePageState extends State<HomePage> {
     return AppBar(
       backgroundColor: Colors.transparent,
       titleSpacing: 0,
-      leading: Icon(
-        Icons.now_widgets_rounded,
-        color: Colors.white,
+      leading: GestureDetector(
+        onTap: () {
+          setState(() {
+            scrollController.jumpTo(0);
+            ShowCaseWidget.of(context).startShowCase(showcaseKeys);
+          });
+        },
+        child: Icon(
+          // Todoish placeholder icon
+          // Onboarding: Manually trigger onboarding when clicking the icon
+          Icons.now_widgets_rounded,
+          color: Colors.white,
+        ),
       ),
       title: Text(
         "Todoish",
@@ -322,7 +333,6 @@ class _HomePageState extends State<HomePage> {
           });
         });
       },
-      "child": task,
     };
 
     return GestureDetector(
@@ -337,11 +347,22 @@ class _HomePageState extends State<HomePage> {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Showcase(
-          key: showcaseParams["key"],
-          description: showcaseParams["description"],
-          child: showcaseParams["child"],
+        child: TaskRow(
+          task: _foundTasks[index],
+          showCaseKey: showcaseParams["key"],
+          showCaseDetail: showCaseDetail,
+          vpadding: 8,
+          hpadding: 25,
+          onTaskClick: _onTaskClick,
+          onTaskChangeComplete: _onTaskChangeComplete,
+          onTaskDelete: _onTaskDelete,
         ),
+        // NOTE - salah, harusnya yg di highlight tombol complete di kiri
+        // child: Showcase(
+        //   key: showcaseParams["key"],
+        //   description: showcaseParams["description"],
+        //   child: showcaseParams["child"],
+        // ),
       ),
     );
   }
@@ -349,12 +370,12 @@ class _HomePageState extends State<HomePage> {
   Expanded _todoList() {
     return Expanded(
       child: ListView.separated(
+        controller: scrollController,
         physics: ScrollPhysics(parent: BouncingScrollPhysics()),
         reverse: false,
         itemCount: _foundTasks.length,
         itemBuilder: (context, index) {
           if (index == 0) {
-            // TODO
             // For the first Task element, we'll show the showcase onboarding
             return _showCaseTaskTile(
                 key: _one_MarkCompleteSection,
@@ -377,6 +398,8 @@ class _HomePageState extends State<HomePage> {
               vpadding: 8,
               hpadding: 25,
               task: _foundTasks[index],
+              showCaseDetail: false,
+              showCaseKey: null,
               onTaskClick: _onTaskClick,
               onTaskChangeComplete: _onTaskChangeComplete,
               onTaskDelete: _onTaskDelete,
