@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 import 'package:todoish/models/tasks.dart';
-import 'package:todoish/api/tasks_fetch.dart';
 import 'package:todoish/pages/task_detail.dart';
 import 'package:todoish/pages/completed_tasks.dart';
 import 'package:todoish/components/task_row.dart';
@@ -35,10 +34,11 @@ class _HomePageState extends State<HomePage> {
 
   List<GlobalKey> showcaseKeys = [];
 
+  // Controllers
+  final searchQueryController = TextEditingController();
   final scrollController = ScrollController();
 
   // WIDGET LIFECYCLE METHODS
-
   @override
   void initState() {
     _foundTasks = tasks;
@@ -73,6 +73,10 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       return ShowCaseWidget.of(context).startShowCase(showcaseKeys);
     });
+  }
+
+  void _clearSearch() {
+    searchQueryController.clear();
   }
 
   List<Task> getCompletedtasks() {
@@ -149,7 +153,13 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   children: [
                     // Searchbox
-                    _searchBar(),
+                    Showcase(
+                      key: _three_SearchTaskSection,
+                      title: "Search Task",
+                      description: "Start typing here to filter and find tasks",
+                      targetBorderRadius: BorderRadius.all(Radius.circular(20)),
+                      child: _searchBar(),
+                    ),
                     _todoList(),
                   ],
                 ),
@@ -223,10 +233,17 @@ class _HomePageState extends State<HomePage> {
       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.circular(20),
-      ),
+          color: Colors.grey,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Color.fromARGB(255, 22, 19, 19).withOpacity(0.20),
+              blurRadius: 30,
+              spreadRadius: 5,
+            ),
+          ]),
       child: TextField(
+        controller: searchQueryController,
         onChanged: (val) => _runFilter(val),
         style: TextStyle(
           color: Colors.white,
@@ -242,7 +259,37 @@ class _HomePageState extends State<HomePage> {
               size: 22,
             ),
             prefixIconConstraints: BoxConstraints(maxHeight: 20, minWidth: 40),
-            border: InputBorder.none,
+            suffixIcon: Container(
+              width: 100,
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const VerticalDivider(
+                      color: Colors.black,
+                      indent: 10,
+                      endIndent: 10,
+                      thickness: 0.2,
+                    ),
+                    GestureDetector(
+                      onTap: _clearSearch,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Icon(
+                          Icons.cancel,
+                          color: Color.fromARGB(255, 128, 128, 128),
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide.none,
+            ),
             hintText: "Search task",
             hintStyle: TextStyle(
                 color: const Color.fromARGB(255, 102, 95, 95),

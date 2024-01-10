@@ -88,23 +88,14 @@ class TaskRow extends StatelessWidget {
       ),
     );
 
-    Widget onboardingDeleteButton = Showcase.withWidget(
+    Widget onboardingDeleteButton = Showcase(
       key: showCaseKey ?? GlobalKey(),
-      height: 70,
-      width: 70,
       targetShapeBorder: const CircleBorder(),
       targetBorderRadius: const BorderRadius.all(
-        Radius.circular(25),
+        Radius.circular(8),
       ),
-      container: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Text(
-            "Delete a Task",
-            style: TextStyle(color: Colors.white),
-          )
-        ],
-      ),
+      title: "Delete Task",
+      description: "Tap and delete a task",
       child: regularDeleteButton,
     );
 
