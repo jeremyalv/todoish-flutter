@@ -15,6 +15,7 @@ class TaskRow extends StatelessWidget {
     required this.onTaskDelete,
     required this.showcaseComplete,
     required this.showcaseDelete,
+    required this.showcaseViewDetail,
     this.showCaseKey,
   });
 
@@ -23,9 +24,10 @@ class TaskRow extends StatelessWidget {
   final double vpadding;
   final double hpadding;
 
+  final GlobalKey<State<StatefulWidget>>? showCaseKey;
   final bool showcaseComplete;
   final bool showcaseDelete;
-  final GlobalKey<State<StatefulWidget>>? showCaseKey;
+  final bool showcaseViewDetail;
 
   // Handlers
   final Function onTaskClick;
@@ -99,13 +101,54 @@ class TaskRow extends StatelessWidget {
       child: regularDeleteButton,
     );
 
+    return TaskRowTile(
+        vpadding: vpadding,
+        hpadding: hpadding,
+        showcaseComplete: showcaseComplete,
+        onboardingCheckboxButton: onboardingCheckboxButton,
+        regularCheckboxButton: regularCheckboxButton,
+        onTaskClick: onTaskClick,
+        task: task,
+        showcaseDelete: showcaseDelete,
+        onboardingDeleteButton: onboardingDeleteButton,
+        regularDeleteButton: regularDeleteButton);
+  }
+}
+
+class TaskRowTile extends StatelessWidget {
+  const TaskRowTile({
+    super.key,
+    required this.vpadding,
+    required this.hpadding,
+    required this.showcaseComplete,
+    required this.onboardingCheckboxButton,
+    required this.regularCheckboxButton,
+    required this.onTaskClick,
+    required this.task,
+    required this.showcaseDelete,
+    required this.onboardingDeleteButton,
+    required this.regularDeleteButton,
+  });
+
+  final double vpadding;
+  final double hpadding;
+  final bool showcaseComplete;
+  final Widget onboardingCheckboxButton;
+  final Widget regularCheckboxButton;
+  final Function onTaskClick;
+  final Task task;
+  final bool showcaseDelete;
+  final Widget onboardingDeleteButton;
+  final Widget regularDeleteButton;
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
       contentPadding:
           EdgeInsets.symmetric(vertical: vpadding, horizontal: hpadding),
       // If showCaseDetail, activate onboarding step #1
       leading:
           showcaseComplete ? onboardingCheckboxButton : regularCheckboxButton,
-      // TODO
       // Onboarding: When title is clicked, dispose onboarding on tap
       title: GestureDetector(
         onTap: () {

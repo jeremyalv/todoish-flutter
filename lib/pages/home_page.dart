@@ -149,7 +149,7 @@ class _HomePageState extends State<HomePage> {
     } else {
       results = _tasks
           .where((task) =>
-              task.todo!.toLowerCase().contains(searchkey.toLowerCase()))
+              task.todo.toLowerCase().contains(searchkey.toLowerCase()))
           .toList();
     }
 
@@ -310,49 +310,85 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Container _showCaseTaskTile({
-    required GlobalKey<State<StatefulWidget>> globalKey,
+  Container _showcaseTaskTile({
+    required GlobalKey<State<StatefulWidget>> showcaseKey,
     required BuildContext context,
     required Task task,
     required int taskIndex,
-    required bool showCaseComplete,
-    required bool showCaseDelete,
+    required bool showcaseComplete,
+    required bool showcaseDelete,
+    required bool showcaseViewDetail,
+    // required bool showCase
   }) {
-    // Change params for Showcase() here
-    // Map<String, dynamic> params = {
-    //   "onTargetClick": () {
-    //     // TODO ini harusnya disesuaikan dengan showcase yang mengharuskan klik details TaskTile
-    //     Navigator.push<void>(
-    //       context,
-    //       MaterialPageRoute<void>(
-    //         builder: (_) => TaskDetail(
-    //             task: _foundTasks[taskIndex],
-    //             completed: completedTasks[_foundTasks[taskIndex].id] == true),
-    //       ),
-    //     ).then((_) {
-    //       // Continue the remaining showcases from showcase index 2 to end
-    //       List<GlobalKey<State<StatefulWidget>>> remainingShowcases =
-    //           showcaseKeys.sublist(1, showcaseKeys.length - 1);
-    //       setState(() {
-    //         // Multi-page Showcasing
-    //         // After tapping TaskTile and navigating back, we want to resume the showcase for the next parts (which are on the previous page)
-    //         ShowCaseWidget.of(context).startShowCase(remainingShowcases);
-    //       });
-    //     });
-    //   },
-    // };
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: TaskRow(
         task: task,
-        showCaseKey: globalKey,
-        showcaseComplete: showCaseComplete,
-        showcaseDelete: showCaseDelete,
+        showCaseKey: showcaseKey,
+        showcaseComplete: showcaseComplete,
+        showcaseDelete: showcaseDelete,
+        showcaseViewDetail: showcaseViewDetail,
         vpadding: 8,
         hpadding: 25,
         onTaskClick: _onTaskClick,
         onTaskChangeComplete: _onTaskChangeComplete,
         onTaskDelete: _onTaskDelete,
+      ),
+    );
+  }
+
+  Container _showCaseTaskTileViewDetails({
+    required GlobalKey<State<StatefulWidget>> showcaseKey,
+    required BuildContext context,
+    required Task task,
+    required int taskIndex,
+  }) {
+    // Custom click method that includes setState() for ShowCaseWidget
+    void onTaskClickShowcase(BuildContext context, Task task) {
+      Navigator.push<void>(
+        context,
+        MaterialPageRoute(
+          builder: (ctx) => TaskDetail(
+            task: task,
+            completed: task.completed,
+          ),
+        ),
+      ).then((_) => {
+            // Continue the remaining showcases from showcase index 2 to end
+            setState(() {
+              // Multi-page Showcasing
+              // After tapping TaskTile and navigating back, we want to resume the showcase for the next parts (which are on the previous page)
+              ShowCaseWidget.of(context).startShowCase([_showcaseKeys[7]]);
+            })
+          });
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Showcase(
+        key: showcaseKey,
+        title: "Task Details",
+        description: "Tap to view task details",
+        tooltipPosition: TooltipPosition.top,
+
+        // To reset showcase sequence flow manually
+        disposeOnTap: true,
+        onTargetClick: () {
+          onTaskClickShowcase(context, task);
+        },
+
+        child: TaskRow(
+          task: task,
+          showCaseKey: showcaseKey,
+          showcaseComplete: false,
+          showcaseDelete: false,
+          showcaseViewDetail: true,
+          vpadding: 8,
+          hpadding: 25,
+          onTaskClick: onTaskClickShowcase,
+          onTaskChangeComplete: _onTaskChangeComplete,
+          onTaskDelete: _onTaskDelete,
+        ),
       ),
     );
   }
@@ -367,20 +403,22 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (context, index) {
           if (index == 0) {
             // For the first Task element, we'll show the showcase step #1 (Complete)
-            return _showCaseTaskTile(
-              globalKey: _one_MarkCompleteSection,
-              showCaseComplete: true,
-              showCaseDelete: false,
+            return _showcaseTaskTile(
+              showcaseKey: _one_MarkCompleteSection,
+              showcaseComplete: true,
+              showcaseDelete: false,
+              showcaseViewDetail: false,
               context: context,
               taskIndex: index,
               task: _foundTasks[index],
             );
           } else if (index == 1) {
             // For the second Task element, we'll show the showcase step #2 (Delete)
-            return _showCaseTaskTile(
-              globalKey: _two_DeleteTaskSection,
-              showCaseComplete: false,
-              showCaseDelete: true,
+            return _showcaseTaskTile(
+              showcaseKey: _two_DeleteTaskSection,
+              showcaseComplete: false,
+              showcaseDelete: true,
+              showcaseViewDetail: false,
               context: context,
               taskIndex: index,
               task: _foundTasks[index],
@@ -404,6 +442,7 @@ class _HomePageState extends State<HomePage> {
               showCaseKey: null,
               showcaseComplete: false,
               showcaseDelete: false,
+              showcaseViewDetail: false,
               onTaskClick: _onTaskClick,
               onTaskChangeComplete: _onTaskChangeComplete,
               onTaskDelete: _onTaskDelete,

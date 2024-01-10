@@ -12,7 +12,7 @@ class CompletedTasks extends StatelessWidget {
       required this.onTaskChangeComplete,
       required this.onTaskDelete});
 
-  late List<Task> completedTasks;
+  final List<Task> completedTasks;
   final Function onTaskClick;
   final Function onTaskChangeComplete;
   final Function onTaskDelete;
@@ -52,6 +52,7 @@ class CompletedTasks extends StatelessWidget {
                       task: completedTasks[index],
                       showcaseComplete: false,
                       showcaseDelete: false,
+                      showcaseViewDetail: false,
                       onTaskClick: onTaskClick,
                       onTaskChangeComplete: onTaskChangeComplete,
                       onTaskDelete: onTaskDelete);
