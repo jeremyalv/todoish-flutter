@@ -77,6 +77,10 @@ class _HomePageState extends State<HomePage> {
 
   void _clearSearch() {
     searchQueryController.clear();
+
+    setState(() {
+      _foundTasks = tasks;
+    });
   }
 
   List<Task> getCompletedtasks() {
