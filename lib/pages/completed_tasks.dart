@@ -50,6 +50,8 @@ class CompletedTasks extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return TaskRow(
                       task: completedTasks[index],
+                      showcaseComplete: false,
+                      showcaseDelete: false,
                       onTaskClick: onTaskClick,
                       onTaskChangeComplete: onTaskChangeComplete,
                       onTaskDelete: onTaskDelete);

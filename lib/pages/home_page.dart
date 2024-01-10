@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, slash_for_doc_comments, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, slash_for_doc_comments, prefer_const_literals_to_create_immutables, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -301,68 +301,50 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  GestureDetector _showCaseTaskTile(
-      {required GlobalKey<State<StatefulWidget>> key,
-      required bool showCaseDetail,
-      required BuildContext context,
-      required Task task}) {
-    // "Do Laundry" task tile
-    int index = 0;
-
+  Container _showCaseTaskTile({
+    required GlobalKey<State<StatefulWidget>> globalKey,
+    required BuildContext context,
+    required Task task,
+    required int taskIndex,
+    required bool showCaseComplete,
+    required bool showCaseDelete,
+  }) {
     // Change params for Showcase() here
-    Map<String, dynamic> showcaseParams = {
-      "key": key,
-      "description": "Tap to complete a task",
-      "tooltipPosition": TooltipPosition.top,
-      "disposeOnTap": true, // Go to detail page
-      "onTargetClick": () {
-        Navigator.push<void>(
-          context,
-          MaterialPageRoute<void>(
-            builder: (_) => TaskDetail(
-                task: _foundTasks[index],
-                completed: completedTasks[_foundTasks[index].id] == true),
-          ),
-        ).then((_) {
-          List<GlobalKey<State<StatefulWidget>>> remainingShowcases =
-              showcaseKeys.sublist(1, showcaseKeys.length - 1);
-          setState(() {
-            // Multi-page Showcasing
-            // After tapping TaskTile and navigating back, we want to resume the showcase for the next parts (which are on the previous page)
-            ShowCaseWidget.of(context).startShowCase(remainingShowcases);
-          });
-        });
-      },
-    };
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.push<void>(
-            context,
-            MaterialPageRoute<void>(
-              builder: (context) => TaskDetail(
-                  task: _foundTasks[index],
-                  completed: completedTasks[_foundTasks[index].id] == true),
-            ));
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: TaskRow(
-          task: _foundTasks[index],
-          showCaseKey: showcaseParams["key"],
-          showCaseDetail: showCaseDetail,
-          vpadding: 8,
-          hpadding: 25,
-          onTaskClick: _onTaskClick,
-          onTaskChangeComplete: _onTaskChangeComplete,
-          onTaskDelete: _onTaskDelete,
-        ),
-        // NOTE - salah, harusnya yg di highlight tombol complete di kiri
-        // child: Showcase(
-        //   key: showcaseParams["key"],
-        //   description: showcaseParams["description"],
-        //   child: showcaseParams["child"],
-        // ),
+    // Map<String, dynamic> params = {
+    //   "onTargetClick": () {
+    //     // TODO ini harusnya disesuaikan dengan showcase yang mengharuskan klik details TaskTile
+    //     Navigator.push<void>(
+    //       context,
+    //       MaterialPageRoute<void>(
+    //         builder: (_) => TaskDetail(
+    //             task: _foundTasks[taskIndex],
+    //             completed: completedTasks[_foundTasks[taskIndex].id] == true),
+    //       ),
+    //     ).then((_) {
+    //       // Continue the remaining showcases from showcase index 2 to end
+    //       List<GlobalKey<State<StatefulWidget>>> remainingShowcases =
+    //           showcaseKeys.sublist(1, showcaseKeys.length - 1);
+    //       setState(() {
+    //         // Multi-page Showcasing
+    //         // After tapping TaskTile and navigating back, we want to resume the showcase for the next parts (which are on the previous page)
+    //         ShowCaseWidget.of(context).startShowCase(remainingShowcases);
+    //       });
+    //     });
+    //   },
+    // };
+    print("$globalKey");
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: TaskRow(
+        task: task,
+        showCaseKey: globalKey,
+        showcaseComplete: showCaseComplete,
+        showcaseDelete: showCaseDelete,
+        vpadding: 8,
+        hpadding: 25,
+        onTaskClick: _onTaskClick,
+        onTaskChangeComplete: _onTaskChangeComplete,
+        onTaskDelete: _onTaskDelete,
       ),
     );
   }
@@ -376,12 +358,29 @@ class _HomePageState extends State<HomePage> {
         itemCount: _foundTasks.length,
         itemBuilder: (context, index) {
           if (index == 0) {
-            // For the first Task element, we'll show the showcase onboarding
+            // For the first Task element, we'll show the showcase step #1 (Complete)
+            print("SHOWCASE ELEMENT $index");
+            print("${_foundTasks[index].todo}");
             return _showCaseTaskTile(
-                key: _one_MarkCompleteSection,
-                showCaseDetail: true,
-                context: context,
-                task: _foundTasks.first);
+              globalKey: _one_MarkCompleteSection,
+              showCaseComplete: true,
+              showCaseDelete: false,
+              context: context,
+              taskIndex: index,
+              task: _foundTasks[index],
+            );
+          } else if (index == 1) {
+            // For the second Task element, we'll show the showcase step #2 (Delete)
+            print("SHOWCASE ELEMENT $index");
+            print("${_foundTasks[index].todo}");
+            return _showCaseTaskTile(
+              globalKey: _two_DeleteTaskSection,
+              showCaseComplete: false,
+              showCaseDelete: true,
+              context: context,
+              taskIndex: index,
+              task: _foundTasks[index],
+            );
           }
           return GestureDetector(
             onTap: () {
@@ -398,8 +397,9 @@ class _HomePageState extends State<HomePage> {
               vpadding: 8,
               hpadding: 25,
               task: _foundTasks[index],
-              showCaseDetail: false,
               showCaseKey: null,
+              showcaseComplete: false,
+              showcaseDelete: false,
               onTaskClick: _onTaskClick,
               onTaskChangeComplete: _onTaskChangeComplete,
               onTaskDelete: _onTaskDelete,

@@ -1,9 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:todoish/constants/colors.dart';
 import 'package:todoish/models/tasks.dart';
-import 'package:todoish/pages/task_detail.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 class TaskRow extends StatelessWidget {
@@ -15,26 +13,28 @@ class TaskRow extends StatelessWidget {
     required this.onTaskClick,
     required this.onTaskChangeComplete,
     required this.onTaskDelete,
-    this.showCaseDetail = false,
-    this.showCaseKey = null,
+    required this.showcaseComplete,
+    required this.showcaseDelete,
+    this.showCaseKey,
   });
 
-  // TODO add key params to build()
-
+  // Params
   final Task task;
+  final double vpadding;
+  final double hpadding;
+
+  final bool showcaseComplete;
+  final bool showcaseDelete;
+  final GlobalKey<State<StatefulWidget>>? showCaseKey;
 
   // Handlers
   final Function onTaskClick;
   final Function onTaskChangeComplete;
   final Function onTaskDelete;
-  final double vpadding;
-  final double hpadding;
-
-  final bool showCaseDetail;
-  final GlobalKey<State<StatefulWidget>>? showCaseKey;
 
   @override
   Widget build(BuildContext context) {
+    // Checkbox Variations
     Widget regularCheckboxButton = Transform.scale(
       scale: 1.35,
       child: Checkbox(
@@ -70,12 +70,51 @@ class TaskRow extends StatelessWidget {
       child: regularCheckboxButton,
     );
 
+    // Delete Button Variations
+    Widget regularDeleteButton = Container(
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+      height: 35,
+      width: 35,
+      decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(5)),
+      child: IconButton(
+        icon: Icon(Icons.delete),
+        iconSize: 18,
+        color: Colors.white,
+        onPressed: () {
+          onTaskDelete(task.id);
+        },
+      ),
+    );
+
+    Widget onboardingDeleteButton = Showcase.withWidget(
+      key: showCaseKey ?? GlobalKey(),
+      height: 70,
+      width: 70,
+      targetShapeBorder: const CircleBorder(),
+      targetBorderRadius: const BorderRadius.all(
+        Radius.circular(25),
+      ),
+      container: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Text(
+            "Delete a Task",
+            style: TextStyle(color: Colors.white),
+          )
+        ],
+      ),
+      child: regularDeleteButton,
+    );
+
     return ListTile(
       contentPadding:
           EdgeInsets.symmetric(vertical: vpadding, horizontal: hpadding),
       // If showCaseDetail, activate onboarding step #1
       leading:
-          showCaseDetail ? onboardingCheckboxButton : regularCheckboxButton,
+          showcaseComplete ? onboardingCheckboxButton : regularCheckboxButton,
+      // TODO
       // Onboarding: When title is clicked, dispose onboarding on tap
       title: GestureDetector(
         onTap: () {
@@ -92,22 +131,7 @@ class TaskRow extends StatelessWidget {
                   : TextDecoration.none),
         ),
       ),
-      trailing: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-        height: 35,
-        width: 35,
-        decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            borderRadius: BorderRadius.circular(5)),
-        child: IconButton(
-          icon: Icon(Icons.delete),
-          iconSize: 18,
-          color: Colors.white,
-          onPressed: () {
-            onTaskDelete(task.id);
-          },
-        ),
-      ),
+      trailing: showcaseDelete ? onboardingDeleteButton : regularDeleteButton,
     );
   }
 }
