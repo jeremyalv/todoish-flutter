@@ -16,12 +16,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Map<int, bool> completedTasks = {};
+  final FocusNode _focusNewTaskField = FocusNode();
 
-  List<Task> tasks = Task.getDummyTasks();
+  // Set to TRUE to activate auto onboarding when starting app
+  final bool _autoOnboarding = false;
+
+  final Map<int, bool> _completedTasks = {};
+  final List<Task> _tasks = Task.getDummyTasks();
+
   List<Task> _foundTasks = [];
-
-  final _taskController = TextEditingController();
 
   // Onboarding: ShowCase section keys
   final GlobalKey _one_MarkCompleteSection = GlobalKey();
@@ -32,19 +35,23 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey _six_ViewTaskDetailsSection = GlobalKey();
   final GlobalKey _seven_ViewCompletedTasksSection = GlobalKey();
 
-  List<GlobalKey> showcaseKeys = [];
+  List<GlobalKey> _showcaseKeys = [];
 
   // Controllers
-  final searchQueryController = TextEditingController();
-  final scrollController = ScrollController();
+  final _newTaskNameController = TextEditingController();
+  final _searchQueryController = TextEditingController();
+  final _scrollController = ScrollController();
 
   // WIDGET LIFECYCLE METHODS
   @override
   void initState() {
-    _foundTasks = tasks;
+    super.initState();
+
+    _focusNewTaskField.addListener(_onNewTaskFieldFocusChange);
+    _foundTasks = _tasks;
 
     // At construct time, fill showcaseKeys
-    showcaseKeys = [
+    _showcaseKeys = [
       _one_MarkCompleteSection,
       _two_DeleteTaskSection,
       _three_SearchTaskSection,
@@ -54,15 +61,19 @@ class _HomePageState extends State<HomePage> {
       _seven_ViewCompletedTasksSection,
     ];
 
-    // Pass in Start onboarding an
-    // _startOnboarding(context, showcaseKeys);
-
-    super.initState();
+    if (_autoOnboarding) _startOnboarding(context, _showcaseKeys);
   }
 
   @override
   void dispose() {
-    scrollController.dispose();
+    // Dispose controllers
+    _scrollController.dispose();
+    _searchQueryController.dispose();
+    _newTaskNameController.dispose();
+
+    // Dispose focus
+    _focusNewTaskField.removeListener(_onNewTaskFieldFocusChange);
+    _focusNewTaskField.dispose();
     super.dispose();
   }
 
@@ -76,30 +87,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _clearSearch() {
-    searchQueryController.clear();
+    _searchQueryController.clear();
 
     setState(() {
-      _foundTasks = tasks;
+      _foundTasks = _tasks;
     });
   }
 
+  void _onNewTaskFieldFocusChange() {
+    debugPrint("Focus ${_focusNewTaskField.hasFocus.toString()}");
+  }
+
   List<Task> getCompletedtasks() {
-    return tasks.where((task) => task.completed == true).toList();
+    return _tasks.where((task) => task.completed == true).toList();
   }
 
   void _addTaskItem(String todo) {
     setState(() {
       Task newTask = Task(
-        id: tasks[tasks.length - 1].id + 1,
+        id: _tasks[_tasks.length - 1].id + 1,
         todo: todo,
         completed: false,
         userId: 1,
       );
 
-      tasks.insert(0, newTask);
+      _tasks.insert(0, newTask);
     });
 
-    _taskController.clear();
+    _newTaskNameController.clear();
   }
 
   void _onTaskClick(BuildContext context, Task task) {
@@ -121,7 +136,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onTaskDelete(int taskId) {
     setState(() {
-      tasks.removeWhere((item) => item.id == taskId);
+      _tasks.removeWhere((item) => item.id == taskId);
     });
   }
 
@@ -129,9 +144,9 @@ class _HomePageState extends State<HomePage> {
     List<Task> results = [];
 
     if (searchkey.isEmpty) {
-      results = tasks;
+      results = _tasks;
     } else {
-      results = tasks
+      results = _tasks
           .where((task) =>
               task.todo!.toLowerCase().contains(searchkey.toLowerCase()))
           .toList();
@@ -189,7 +204,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ]),
       child: TextField(
-        controller: searchQueryController,
+        controller: _searchQueryController,
         onChanged: (val) => _runFilter(val),
         style: TextStyle(
           color: Colors.white,
@@ -251,8 +266,8 @@ class _HomePageState extends State<HomePage> {
       leading: GestureDetector(
         onTap: () {
           setState(() {
-            scrollController.jumpTo(0);
-            ShowCaseWidget.of(context).startShowCase(showcaseKeys);
+            _scrollController.jumpTo(0);
+            ShowCaseWidget.of(context).startShowCase(_showcaseKeys);
           });
         },
         child: Icon(
@@ -325,7 +340,6 @@ class _HomePageState extends State<HomePage> {
     //     });
     //   },
     // };
-    print("$globalKey");
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: TaskRow(
@@ -345,15 +359,13 @@ class _HomePageState extends State<HomePage> {
   Expanded _todoList() {
     return Expanded(
       child: ListView.separated(
-        controller: scrollController,
+        controller: _scrollController,
         physics: ScrollPhysics(parent: BouncingScrollPhysics()),
         reverse: false,
         itemCount: _foundTasks.length,
         itemBuilder: (context, index) {
           if (index == 0) {
             // For the first Task element, we'll show the showcase step #1 (Complete)
-            print("SHOWCASE ELEMENT $index");
-            print("${_foundTasks[index].todo}");
             return _showCaseTaskTile(
               globalKey: _one_MarkCompleteSection,
               showCaseComplete: true,
@@ -364,8 +376,6 @@ class _HomePageState extends State<HomePage> {
             );
           } else if (index == 1) {
             // For the second Task element, we'll show the showcase step #2 (Delete)
-            print("SHOWCASE ELEMENT $index");
-            print("${_foundTasks[index].todo}");
             return _showCaseTaskTile(
               globalKey: _two_DeleteTaskSection,
               showCaseComplete: false,
@@ -383,7 +393,7 @@ class _HomePageState extends State<HomePage> {
                     builder: (context) => TaskDetail(
                         task: _foundTasks[index],
                         completed:
-                            completedTasks[_foundTasks[index].id] == true),
+                            _completedTasks[_foundTasks[index].id] == true),
                   ));
             },
             child: TaskRow(
@@ -422,7 +432,7 @@ class _HomePageState extends State<HomePage> {
               targetPadding: EdgeInsets.only(
                 top: 10,
               ),
-              child: _addTaskTextBox(),
+              child: _addTaskTextField(),
             ),
           ),
           Showcase(
@@ -441,55 +451,56 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Container _addTaskTextBox() {
+  Container _addTaskTextField() {
     return Container(
-              margin: EdgeInsets.only(bottom: 10, right: 15, left: 15),
-              padding: EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                  color: Colors.grey,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black45,
-                      offset: Offset(0, 0),
-                      blurRadius: 7,
-                      spreadRadius: 3,
-                    )
-                  ],
-                  borderRadius: BorderRadius.circular(15)),
-              child: TextField(
-                  controller: _taskController,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Add a new task",
-                    hintStyle: TextStyle(color: Colors.white),
-                    border: InputBorder.none,
-                  )),
-            );
+      margin: EdgeInsets.only(bottom: 10, right: 15, left: 15),
+      padding: EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+          color: Colors.grey,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black45,
+              offset: Offset(0, 0),
+              blurRadius: 7,
+              spreadRadius: 3,
+            )
+          ],
+          borderRadius: BorderRadius.circular(15)),
+      child: TextField(
+          focusNode: _focusNewTaskField,
+          controller: _newTaskNameController,
+          style: TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: "Add a new task",
+            hintStyle: TextStyle(color: Colors.white),
+            border: InputBorder.none,
+          )),
+    );
   }
 
   Container _addTaskToList() {
     return Container(
-            margin: EdgeInsets.only(bottom: 10, right: 15),
-            child: ElevatedButton(
-              onPressed: () {
-                _addTaskItem(_taskController.text);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey,
-                minimumSize: Size(60, 60),
-                elevation: 10,
-              ),
-              child: Text(
-                '+',
-                style: TextStyle(
-                  fontSize: 40,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          );
+      margin: EdgeInsets.only(bottom: 10, right: 15),
+      child: ElevatedButton(
+        onPressed: () {
+          _addTaskItem(_newTaskNameController.text);
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey,
+          minimumSize: Size(60, 60),
+          elevation: 10,
+        ),
+        child: Text(
+          '+',
+          style: TextStyle(
+            fontSize: 40,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 }
