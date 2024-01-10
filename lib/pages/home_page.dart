@@ -174,64 +174,6 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
-  Align bottomMenuAddTask() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.only(bottom: 15, right: 20, left: 20),
-              padding: EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                  color: Colors.grey,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black45,
-                      offset: Offset(0, 0),
-                      blurRadius: 7,
-                      spreadRadius: 3,
-                    )
-                  ],
-                  borderRadius: BorderRadius.circular(15)),
-              child: TextField(
-                  controller: _taskController,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Add a new task",
-                    hintStyle: TextStyle(color: Colors.white),
-                    border: InputBorder.none,
-                  )),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(bottom: 15, right: 20),
-            child: ElevatedButton(
-              onPressed: () {
-                _addTaskItem(_taskController.text);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey,
-                minimumSize: Size(60, 60),
-                elevation: 10,
-              ),
-              child: Text(
-                '+',
-                style: TextStyle(
-                  fontSize: 40,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Container _searchBar() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -464,5 +406,90 @@ class _HomePageState extends State<HomePage> {
             )),
       ),
     );
+  }
+
+  Align bottomMenuAddTask() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Row(
+        children: [
+          Expanded(
+            child: Showcase(
+              key: _four_TypeNewTaskSection,
+              title: "Adding Tasks",
+              description: "Type a new todo",
+              targetBorderRadius: BorderRadius.all(Radius.circular(20)),
+              targetPadding: EdgeInsets.only(
+                top: 10,
+              ),
+              child: _addTaskTextBox(),
+            ),
+          ),
+          Showcase(
+            key: _five_ClickAddTaskSection,
+            title: "Adding Tasks",
+            description: "Insert the new task to your list",
+            targetBorderRadius: BorderRadius.all(Radius.circular(50)),
+            targetPadding: EdgeInsets.only(
+              top: 10,
+              left: 15,
+            ),
+            child: _addTaskToList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container _addTaskTextBox() {
+    return Container(
+              margin: EdgeInsets.only(bottom: 10, right: 15, left: 15),
+              padding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                  color: Colors.grey,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black45,
+                      offset: Offset(0, 0),
+                      blurRadius: 7,
+                      spreadRadius: 3,
+                    )
+                  ],
+                  borderRadius: BorderRadius.circular(15)),
+              child: TextField(
+                  controller: _taskController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Add a new task",
+                    hintStyle: TextStyle(color: Colors.white),
+                    border: InputBorder.none,
+                  )),
+            );
+  }
+
+  Container _addTaskToList() {
+    return Container(
+            margin: EdgeInsets.only(bottom: 10, right: 15),
+            child: ElevatedButton(
+              onPressed: () {
+                _addTaskItem(_taskController.text);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey,
+                minimumSize: Size(60, 60),
+                elevation: 10,
+              ),
+              child: Text(
+                '+',
+                style: TextStyle(
+                  fontSize: 40,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          );
   }
 }
