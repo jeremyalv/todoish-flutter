@@ -423,6 +423,12 @@ class _HomePageState extends State<HomePage> {
               taskIndex: index,
               task: _foundTasks[index],
             );
+          } else if (index == 2) {
+            return _showCaseTaskTileViewDetails(
+                showcaseKey: _six_ViewTaskDetailsSection,
+                context: context,
+                task: _foundTasks[index],
+                taskIndex: index);
           }
           return GestureDetector(
             onTap: () {
