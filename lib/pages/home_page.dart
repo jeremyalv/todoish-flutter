@@ -95,7 +95,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onNewTaskFieldFocusChange() {
-    debugPrint("Focus ${_focusNewTaskField.hasFocus.toString()}");
+    debugPrint(
+        "Focus _onNewTaskFieldFocusChange: ${_focusNewTaskField.hasFocus.toString()}");
   }
 
   List<Task> getCompletedtasks() {
@@ -419,33 +420,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   Align bottomMenuAddTask() {
+    // Text
+    Widget showcaseAddTaskTextField = Showcase(
+      key: _four_TypeNewTaskSection,
+      title: "Adding Tasks",
+      description: "Type a new todo",
+      targetBorderRadius: BorderRadius.all(Radius.circular(20)),
+      targetPadding: EdgeInsets.only(
+        top: 10,
+      ),
+      child: _addTaskTextField(),
+    );
+
+    // Button
+    Widget showcaseAddTaskButton = Showcase(
+      key: _five_ClickAddTaskSection,
+      title: "Adding Tasks",
+      description: "Insert the new task to your list",
+      targetBorderRadius: BorderRadius.all(Radius.circular(50)),
+      targetPadding: EdgeInsets.only(
+        top: 10,
+        left: 15,
+      ),
+      child: _addTaskButton(),
+    );
     return Align(
       alignment: Alignment.bottomCenter,
       child: Row(
         children: [
           Expanded(
-            child: Showcase(
-              key: _four_TypeNewTaskSection,
-              title: "Adding Tasks",
-              description: "Type a new todo",
-              targetBorderRadius: BorderRadius.all(Radius.circular(20)),
-              targetPadding: EdgeInsets.only(
-                top: 10,
-              ),
-              child: _addTaskTextField(),
-            ),
+            child: showcaseAddTaskTextField,
           ),
-          Showcase(
-            key: _five_ClickAddTaskSection,
-            title: "Adding Tasks",
-            description: "Insert the new task to your list",
-            targetBorderRadius: BorderRadius.all(Radius.circular(50)),
-            targetPadding: EdgeInsets.only(
-              top: 10,
-              left: 15,
-            ),
-            child: _addTaskToList(),
-          ),
+          showcaseAddTaskButton,
         ],
       ),
     );
@@ -481,7 +487,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Container _addTaskToList() {
+  Container _addTaskButton() {
     return Container(
       margin: EdgeInsets.only(bottom: 10, right: 15),
       child: ElevatedButton(
